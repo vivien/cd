@@ -161,6 +161,14 @@ function cd {
   ${fn:-:} "$target" "$@"
 }
 
+function cd_as_root {
+  if which sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    su root -c "$(printf '%q ' "$@")"
+  fi
+}
+
 # Mountpoint allocation
 function cd_mount {
   local mount_command=$1
