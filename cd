@@ -171,6 +171,12 @@ function cd_as_root {
 
 # Mountpoint allocation
 function cd_mount {
+  local as_root=0
+  if [ $1 = --as-root ]; then
+    as_root=1
+    shift
+  fi
+
   local mount_command=$1
   shift
 
@@ -182,7 +188,12 @@ function cd_mount {
 
   if [[ ! -e "$dirname" ]]; then
     mkdir -p "$dirname"
-    if ! $mount_command "$target" "$dirname"; then
+    if [ $as_root -eq 1 ]; then
+      cd_as_root $mount_command "$target" "$dirname"
+    else
+      $mount_command "$target" "$dirname"
+    fi
+    if [ $? -ne 0 ]; then
       rmdir "$dirname"
       return 1
     fi
@@ -191,6 +202,12 @@ function cd_mount {
 }
 
 function cd_umount {
+  local as_root=0
+  if [ $1 = --as-root ]; then
+    as_root=1
+    shift
+  fi
+
   local umount_command=$1
   shift
 
@@ -204,7 +221,12 @@ function cd_umount {
 
   if [[ ($1 == --different && -d $pwd_mount) ||
         ($1 == --same      &&    $pwd_mount != $new_mount) ]]; then
-    if $umount_command "$pwd_mount" >& /dev/null; then
+    if [ $as_root -eq 1 ]; then
+      cd_as_root $umount_command "$pwd_mount" >& /dev/null
+    else
+      $umount_command "$pwd_mount" >& /dev/null
+    fi
+    if [ $? -eq 0 ]; then
       rmdir "$pwd_mount"
     else
       echo "cd: ${pwd_mount#$HOME/.cd/mountpoints/} is still mounted" \

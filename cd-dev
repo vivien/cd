@@ -5,9 +5,9 @@
 cd_on '^/dev/(.*)' cd_dev_mount cd_dev_umount
 
 function cd_dev_mount {
-  cd_mount 'sudo mount' "$@"
+  cd_mount --as-root 'mount' "$@"
 }
 
 function cd_dev_umount {
-  cd_umount 'sudo umount' "$@"
+  cd_umount --as-root 'umount' "$@"
 }
